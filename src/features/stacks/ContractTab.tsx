@@ -43,7 +43,10 @@ export function ContractTab({ stack, issues, skillsById }: { stack: Stack; issue
           {LIST_SECTIONS.map((s) => (
             <ItemListSection
               key={s.key}
-              {...s}
+              title={s.title}
+              hint={s.hint}
+              placeholder={s.placeholder}
+              icon={s.icon}
               items={c[s.key]}
               sectionIssues={issuesFor(s.key)}
               onChange={(items) => save({ ...c, [s.key]: items })}
@@ -124,7 +127,7 @@ function Card({ icon: Icon, title, hint, issues, children }: { icon: React.Compo
   );
 }
 
-function ItemListSection({ title, hint, placeholder, icon, items, sectionIssues, onChange }: (typeof LIST_SECTIONS)[number] & { items: ContractItem[]; sectionIssues: Issue[]; onChange: (items: ContractItem[]) => void }) {
+function ItemListSection({ title, hint, placeholder, icon, items, sectionIssues, onChange }: Omit<(typeof LIST_SECTIONS)[number], 'key'> & { items: ContractItem[]; sectionIssues: Issue[]; onChange: (items: ContractItem[]) => void }) {
   return (
     <Card icon={icon} title={title} hint={hint} issues={sectionIssues}>
       {items.length > 0 && (
