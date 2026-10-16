@@ -1,6 +1,8 @@
 # SkillProof
 
-A local-first studio for designing, validating, evaluating and shipping AI agent skills (`SKILL.md`, Agent Skills compatible) and the stacks they form.
+A local-first studio for understanding how AI agent skills (`SKILL.md`, Agent Skills compatible) fit together — not for editing individual skills or manually constructing workflows.
+
+Connect an existing skill repository and see how its skills collectively organize the work: areas of responsibility, overlaps, conflicts, gaps, and relationships — without manually rebuilding the landscape. Skills are treated as SOPs and organizational knowledge, not rigid instructions telling an agent how to perform.
 
 Everything runs in the browser. Data lives in IndexedDB; there is no server, account, or paid API.
 
@@ -20,13 +22,13 @@ On first launch a demo workspace is seeded: interconnected skills, three stacks,
 
 | Area | What you can do |
 | --- | --- |
-| **Library** | Create, edit (write / split / preview), tag, foldering, search and filter skills. Manage attached files (`references/`, `scripts/`, …). Export one skill as `SKILL.md` or a folder ZIP. |
+| **Skill Landscape** (primary) | A responsibility map that automatically organizes imported skills into work areas, detects relationships (verified, inferred, manual), reveals overlaps and gaps, and lets you explore from the high-level map down to individual skill sections and source files. |
 | **Import** | Files, folders, ZIPs, public GitHub repos/sub-folders (optional token in Settings), and SkillProof stack bundles. Preview, pick, and choose a duplicate strategy (keep, overwrite, copy). |
-| **Stack builder** | React Flow canvas with drag-from-palette, four relationship kinds (*depends on*, *hands off to*, *shares policy with*, *conflicts with*), inspector, auto layout, undo/redo, keyboard shortcuts. |
-| **Workflow contract** | Goals, expectations, quality standards, approval checkpoints (tied to a node + approver) and required outputs (tied to a producing node). It defines *what* done means, never *how* agents work. |
-| **Validation** | Frontmatter/spec structure, broken file links, missing skills, dependency cycles, conflicts without a resolution rule, handoffs that don't name their artifact, incomplete contracts. Errors block publishing. |
+| **Library** (supporting) | Create, edit (write / split / preview), tag, folder, search and filter skills. Manage attached files. Export one skill or a folder ZIP. |
+| **Stacks** (supporting) | Compose skills into stacks with a React Flow canvas: four relationship kinds, inspector, auto layout, undo/redo. Workflow contracts define what done means. |
+| **Validation** | Frontmatter/spec structure, broken file links, missing skills, dependency cycles, conflicts without resolution, incomplete contracts. Errors block publishing. |
 | **Evaluation** | Scenarios with criteria, manually recorded outcomes per revision, a clearly labeled simulated coverage check, and per-revision pass-rate comparison. |
-| **Versioning** | Drafts are editable; publishing creates an immutable snapshot (`v1`, `v2`, …). History, restore-to-draft, and side-by-side diffs for skills and stacks. |
+| **Versioning** | Editable drafts; publishing creates an immutable snapshot. History, restore-to-draft, and side-by-side diffs. |
 | **Distribution** | Export a stack as a portable bundle, re-import it anywhere. |
 
 Press <kbd>⌘K</kbd> / <kbd>Ctrl K</kbd> for the command palette.
@@ -36,12 +38,15 @@ Press <kbd>⌘K</kbd> / <kbd>Ctrl K</kbd> for the command palette.
 ```
 src/
   domain/     Pure logic, no I/O: types, SKILL.md parsing, validation, graph algorithms,
-              hashing & diffs, bundle format, importers, evaluation heuristics.
+              hashing & diffs, bundle format, importers, evaluation heuristics,
+              landscape analysis (work area detection, relationship inference).
   data/       Storage. `repository.ts` is the typed interface; `dexie-repository.ts`
-              implements it on IndexedDB; `hooks.tsx` exposes live queries to React.
+              implements it on IndexedDB; `hooks.tsx` exposes live queries to React,
+              including `useLandscape` which builds the landscape from skill content.
   services/   Orchestration over the repository: imports, GitHub fetching, file reading.
   store/      Zustand UI state only (route, theme, dialogs, graph focus). No domain data.
-  features/   UI per area: library, stacks (+ graph), evals, import, settings, versions, shell.
+  features/   UI per area: landscape (map, areas, relationships, gaps), library, stacks,
+              evals, import, settings, versions, shell.
   components/ Shared UI primitives (shadcn/ui) and app-wide building blocks.
 ```
 
@@ -78,6 +83,21 @@ skills/<dir>/<files...>    attached files
 - **Real checks**: validation is deterministic and runs on the actual content. It's labeled *Real check*.
 - **Recorded**: you run the scenario with your own agent, then mark which criteria were met. These are the outcomes that matter.
 - **Simulated**: a static keyword-coverage heuristic. A criterion "passes" when the instructions at a revision mention at least half its key terms. **No agent is executed.** It's labeled *Simulated* everywhere and charted separately.
+
+## Landscape analysis
+
+The Skill Landscape is built entirely from skill content — no manual setup required.
+
+**Work areas** are detected by matching skill content, tags, and folder names against a keyword catalog spanning security, code quality, deployment, incident response, data, frontend, documentation, APIs, version control, and project process. Skills can belong to multiple areas with a membership strength score.
+
+**Relationships** have three trust levels:
+- **Verified**: found via explicit markdown links or shared file references between skills. These are confirmed connections.
+- **Inferred**: detected from content similarity (cosine TF), shared tags, and heading overlap. Each carries a confidence score and a human-readable reason. They are clearly marked as suggestions, not facts.
+- **Manual**: user-defined edges from stacks. These are the connections a user explicitly drew.
+
+**Gaps** are detected automatically: areas with only weak membership, areas with excessive overlap, and skills that can't be mapped to any area.
+
+Relationships do not imply a fixed execution sequence. A skill that complements another may run before, after, or alongside it — the landscape describes how skills relate, not how to order them.
 
 ## Tests
 

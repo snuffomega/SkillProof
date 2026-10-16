@@ -1,5 +1,6 @@
-import { createContext, useContext, type ReactNode } from 'react';
+import { createContext, useContext, useMemo, type ReactNode } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
+import { buildLandscape } from '@/domain/landscape';
 import type { EvalTargetType, ID } from '@/domain/types';
 import type { SkillProofRepository } from './repository';
 
@@ -58,4 +59,16 @@ export function useRuns(scenarioId?: ID) {
 export function useSetting(key: 'githubToken' | 'seededAt') {
   const repo = useRepository();
   return useLiveQuery(() => repo.getSetting(key).then((v) => v ?? ''), [repo, key]);
+}
+
+export function useLandscape() {
+  const skills = useSkills();
+  const stacks = useStacks();
+  return useMemo(() => {
+    if (!skills) return undefined;
+    const manualEdges = (stacks ?? []).flatMap((st) =>
+      st.edges.map((e) => ({ source: e.source, target: e.target, kind: e.kind, label: e.label })),
+    );
+    return buildLandscape(skills, manualEdges);
+  }, [skills, stacks]);
 }

@@ -3,8 +3,10 @@ import { persist } from 'zustand/middleware';
 
 export type StackTab = 'graph' | 'contract' | 'validation' | 'versions';
 export type SkillTab = 'edit' | 'files' | 'versions' | 'evals';
+export type LandscapeTab = 'map' | 'areas' | 'relationships' | 'gaps';
 
 export type Route =
+  | { view: 'landscape'; tab?: LandscapeTab; areaId?: string; skillId?: string }
   | { view: 'library'; skillId?: string; tab?: SkillTab }
   | { view: 'stacks'; stackId?: string; tab?: StackTab }
   | { view: 'evals'; scenarioId?: string }
@@ -12,6 +14,8 @@ export type Route =
 
 export function routeToHash(r: Route): string {
   switch (r.view) {
+    case 'landscape':
+      return `#/landscape${r.tab && r.tab !== 'map' ? `/${r.tab}` : ''}${r.areaId ? `/area/${r.areaId}` : ''}${r.skillId ? `/skill/${r.skillId}` : ''}`;
     case 'library':
       return `#/library${r.skillId ? `/${r.skillId}${r.tab && r.tab !== 'edit' ? `/${r.tab}` : ''}` : ''}`;
     case 'stacks':
@@ -24,11 +28,24 @@ export function routeToHash(r: Route): string {
 }
 
 export function hashToRoute(hash: string): Route {
-  const [view, id, tab] = hash.replace(/^#\/?/, '').split('/');
-  if (view === 'stacks') return { view, stackId: id || undefined, tab: (tab as StackTab) || 'graph' };
-  if (view === 'evals') return { view, scenarioId: id || undefined };
+  const parts = hash.replace(/^#\/?/, '').split('/');
+  const view = parts[0];
+  if (view === 'landscape') {
+    const tab = (parts[1] as LandscapeTab) || 'map';
+    const areaIdx = parts.indexOf('area');
+    const skillIdx = parts.indexOf('skill');
+    return {
+      view: 'landscape',
+      tab: ['map', 'areas', 'relationships', 'gaps'].includes(tab) ? tab : 'map',
+      areaId: areaIdx >= 0 ? parts[areaIdx + 1] : undefined,
+      skillId: skillIdx >= 0 ? parts[skillIdx + 1] : undefined,
+    };
+  }
+  if (view === 'stacks') return { view, stackId: parts[1] || undefined, tab: (parts[2] as StackTab) || 'graph' };
+  if (view === 'evals') return { view, scenarioId: parts[1] || undefined };
+  if (view === 'library') return { view, skillId: parts[1] || undefined, tab: (parts[2] as SkillTab) || 'edit' };
   if (view === 'settings') return { view };
-  return { view: 'library', skillId: id || undefined, tab: (tab as SkillTab) || 'edit' };
+  return { view: 'landscape', tab: 'map' };
 }
 
 export type Dialog = 'import' | 'new-skill' | 'new-stack' | null;

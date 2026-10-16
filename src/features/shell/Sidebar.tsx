@@ -1,4 +1,4 @@
-import { FlaskConical, HardDrive, LibraryBig, Moon, Search, Settings, Sun, Upload, Waypoints, Workflow } from 'lucide-react';
+import { FlaskConical, HardDrive, LibraryBig, Moon, Network, Search, Settings, Sun, Upload, Workflow } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useScenarios, useSkills, useStacks } from '@/data/hooks';
 import { useUI, type Route } from '@/store/ui';
@@ -46,11 +46,11 @@ export function Sidebar() {
     <aside className="flex w-14 shrink-0 flex-col border-r bg-surface/60 md:w-60">
       <div className="flex h-14 items-center gap-2.5 px-3.5 md:px-4">
         <div className="grid size-7 shrink-0 place-items-center rounded-lg bg-foreground text-background">
-          <Waypoints className="size-4" />
+          <Network className="size-4" />
         </div>
         <div className="hidden min-w-0 md:block">
           <div className="text-[14px] font-semibold leading-tight tracking-tight">SkillProof</div>
-          <div className="text-[11px] leading-tight text-muted-foreground">Skill stack studio</div>
+          <div className="text-[11px] leading-tight text-muted-foreground">Skill landscape studio</div>
         </div>
       </div>
 
@@ -66,6 +66,7 @@ export function Sidebar() {
       </div>
 
       <nav className="space-y-0.5 px-2.5">
+        <NavItem icon={Network} label="Landscape" active={route.view === 'landscape'} onClick={() => go({ view: 'landscape' })} />
         <NavItem icon={LibraryBig} label="Skill Library" active={route.view === 'library'} count={skills?.length} onClick={() => go({ view: 'library' })} />
         <NavItem icon={Workflow} label="Stacks" active={route.view === 'stacks'} count={stacks?.length} onClick={() => go({ view: 'stacks' })} />
         <NavItem icon={FlaskConical} label="Evaluations" active={route.view === 'evals'} count={scenarios?.length} onClick={() => go({ view: 'evals' })} />

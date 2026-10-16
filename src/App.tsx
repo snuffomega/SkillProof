@@ -4,6 +4,7 @@ import { Toaster } from '@/components/ui/sonner';
 import { useUI } from '@/store/ui';
 import { Sidebar } from '@/features/shell/Sidebar';
 import { CommandPalette } from '@/features/shell/CommandPalette';
+import { LandscapeView } from '@/features/landscape/LandscapeView';
 import { LibraryView } from '@/features/library/LibraryView';
 import { StacksView } from '@/features/stacks/StacksView';
 import { EvalsView } from '@/features/evals/EvalsView';
@@ -42,6 +43,7 @@ export default function App() {
       <div className="flex h-full overflow-hidden bg-background">
         <Sidebar />
         <main className="flex min-w-0 flex-1 flex-col overflow-hidden">
+          {route.view === 'landscape' && <LandscapeView tab={route.tab ?? 'map'} areaId={route.areaId} skillId={route.skillId} />}
           {route.view === 'library' && <LibraryView skillId={route.skillId} tab={route.tab ?? 'edit'} />}
           {route.view === 'stacks' && <StacksView stackId={route.stackId} tab={route.tab ?? 'graph'} />}
           {route.view === 'evals' && <EvalsView scenarioId={route.scenarioId} />}
