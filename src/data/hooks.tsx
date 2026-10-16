@@ -1,0 +1,61 @@
+import { createContext, useContext, type ReactNode } from 'react';
+import { useLiveQuery } from 'dexie-react-hooks';
+import type { EvalTargetType, ID } from '@/domain/types';
+import type { SkillProofRepository } from './repository';
+
+const RepositoryContext = createContext<SkillProofRepository | null>(null);
+
+export function RepositoryProvider({ repository, children }: { repository: SkillProofRepository; children: ReactNode }) {
+  return <RepositoryContext.Provider value={repository}>{children}</RepositoryContext.Provider>;
+}
+
+export function useRepository(): SkillProofRepository {
+  const repo = useContext(RepositoryContext);
+  if (!repo) throw new Error('useRepository must be used inside RepositoryProvider');
+  return repo;
+}
+
+export function useSkills() {
+  const repo = useRepository();
+  return useLiveQuery(() => repo.listSkills(), [repo]);
+}
+
+export function useSkill(id: ID | undefined) {
+  const repo = useRepository();
+  return useLiveQuery(() => (id ? repo.getSkill(id) : undefined), [repo, id]);
+}
+
+export function useSkillVersions(skillId: ID | undefined) {
+  const repo = useRepository();
+  return useLiveQuery(() => (skillId ? repo.listSkillVersions(skillId) : []), [repo, skillId]);
+}
+
+export function useStacks() {
+  const repo = useRepository();
+  return useLiveQuery(() => repo.listStacks(), [repo]);
+}
+
+export function useStack(id: ID | undefined) {
+  const repo = useRepository();
+  return useLiveQuery(() => (id ? repo.getStack(id) : undefined), [repo, id]);
+}
+
+export function useStackVersions(stackId: ID | undefined) {
+  const repo = useRepository();
+  return useLiveQuery(() => (stackId ? repo.listStackVersions(stackId) : []), [repo, stackId]);
+}
+
+export function useScenarios(target?: { type: EvalTargetType; id: ID }) {
+  const repo = useRepository();
+  return useLiveQuery(() => repo.listScenarios(target), [repo, target?.type, target?.id]);
+}
+
+export function useRuns(scenarioId?: ID) {
+  const repo = useRepository();
+  return useLiveQuery(() => repo.listRuns(scenarioId), [repo, scenarioId]);
+}
+
+export function useSetting(key: 'githubToken' | 'seededAt') {
+  const repo = useRepository();
+  return useLiveQuery(() => repo.getSetting(key).then((v) => v ?? ''), [repo, key]);
+}

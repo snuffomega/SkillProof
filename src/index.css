@@ -1,0 +1,246 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "@xyflow/react/dist/style.css";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  --radius: 0.5rem;
+  --background: oklch(0.985 0.002 170);
+  --foreground: oklch(0.2 0.01 180);
+  --surface: oklch(1 0 0);
+  --surface-2: oklch(0.965 0.003 170);
+  --card: oklch(1 0 0);
+  --card-foreground: var(--foreground);
+  --popover: oklch(1 0 0);
+  --popover-foreground: var(--foreground);
+  --primary: oklch(0.58 0.11 175);
+  --primary-foreground: oklch(0.99 0 0);
+  --secondary: oklch(0.955 0.004 170);
+  --secondary-foreground: oklch(0.25 0.01 180);
+  --muted: oklch(0.955 0.004 170);
+  --muted-foreground: oklch(0.5 0.012 180);
+  --accent: oklch(0.945 0.006 170);
+  --accent-foreground: oklch(0.2 0.01 180);
+  --destructive: oklch(0.58 0.2 25);
+  --destructive-foreground: oklch(0.99 0 0);
+  --border: oklch(0.91 0.004 170);
+  --input: oklch(0.89 0.005 170);
+  --ring: oklch(0.58 0.11 175);
+  --canvas: oklch(0.975 0.003 170);
+  --canvas-dot: oklch(0.85 0.006 170);
+
+  --rel-depends: oklch(0.6 0.13 240);
+  --rel-handoff: oklch(0.58 0.12 170);
+  --rel-policy: oklch(0.68 0.14 75);
+  --rel-conflict: oklch(0.6 0.2 22);
+
+  --ok: oklch(0.6 0.14 155);
+  --warn: oklch(0.7 0.15 70);
+  --err: oklch(0.6 0.2 25);
+  --info: oklch(0.6 0.12 240);
+}
+
+.dark {
+  --background: oklch(0.155 0.004 180);
+  --foreground: oklch(0.93 0.004 170);
+  --surface: oklch(0.18 0.005 180);
+  --surface-2: oklch(0.205 0.006 180);
+  --card: oklch(0.185 0.005 180);
+  --card-foreground: var(--foreground);
+  --popover: oklch(0.2 0.006 180);
+  --popover-foreground: var(--foreground);
+  --primary: oklch(0.78 0.12 172);
+  --primary-foreground: oklch(0.18 0.02 175);
+  --secondary: oklch(0.235 0.006 180);
+  --secondary-foreground: oklch(0.9 0.004 170);
+  --muted: oklch(0.225 0.006 180);
+  --muted-foreground: oklch(0.66 0.01 175);
+  --accent: oklch(0.25 0.007 180);
+  --accent-foreground: oklch(0.95 0.004 170);
+  --destructive: oklch(0.62 0.19 25);
+  --destructive-foreground: oklch(0.98 0 0);
+  --border: oklch(0.27 0.006 180);
+  --input: oklch(0.3 0.007 180);
+  --ring: oklch(0.78 0.12 172);
+  --canvas: oklch(0.14 0.004 180);
+  --canvas-dot: oklch(0.3 0.006 180);
+
+  --rel-depends: oklch(0.72 0.12 240);
+  --rel-handoff: oklch(0.78 0.12 172);
+  --rel-policy: oklch(0.8 0.13 80);
+  --rel-conflict: oklch(0.68 0.19 22);
+
+  --ok: oklch(0.75 0.14 155);
+  --warn: oklch(0.8 0.14 75);
+  --err: oklch(0.68 0.19 25);
+  --info: oklch(0.72 0.12 240);
+}
+
+@theme inline {
+  --font-sans: "Geist", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-mono: "Geist Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-canvas: var(--canvas);
+  --color-rel-depends: var(--rel-depends);
+  --color-rel-handoff: var(--rel-handoff);
+  --color-rel-policy: var(--rel-policy);
+  --color-rel-conflict: var(--rel-conflict);
+  --color-ok: var(--ok);
+  --color-warn: var(--warn);
+  --color-err: var(--err);
+  --color-info: var(--info);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+@layer base {
+  * {
+    border-color: var(--border);
+  }
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+  body {
+    background: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-sans);
+    font-size: 14px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    font-feature-settings: "ss01", "cv11";
+  }
+  h1, h2, h3, h4 {
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+  }
+  ::selection {
+    background: color-mix(in oklch, var(--primary) 30%, transparent);
+  }
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
+}
+
+.scrollbar-thin {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+
+.kbd {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  line-height: 1;
+  padding: 3px 5px;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--muted-foreground);
+}
+
+/* Markdown preview */
+.prose-skill {
+  font-size: 14px;
+  line-height: 1.65;
+  color: var(--foreground);
+}
+.prose-skill > * + * { margin-top: 0.75em; }
+.prose-skill h1 { font-size: 1.5em; font-weight: 600; margin-top: 0.4em; }
+.prose-skill h2 { font-size: 1.2em; font-weight: 600; margin-top: 1.6em; padding-bottom: 0.3em; border-bottom: 1px solid var(--border); }
+.prose-skill h3 { font-size: 1.05em; font-weight: 600; margin-top: 1.3em; }
+.prose-skill ul { list-style: disc; padding-left: 1.3em; }
+.prose-skill ol { list-style: decimal; padding-left: 1.3em; }
+.prose-skill li + li { margin-top: 0.25em; }
+.prose-skill a { color: var(--primary); text-decoration: underline; text-underline-offset: 2px; }
+.prose-skill code { font-family: var(--font-mono); font-size: 0.86em; padding: 0.15em 0.35em; border-radius: 4px; background: var(--muted); }
+.prose-skill pre { font-family: var(--font-mono); font-size: 12.5px; padding: 12px 14px; border-radius: 8px; background: var(--surface-2); border: 1px solid var(--border); overflow-x: auto; }
+.prose-skill pre code { background: none; padding: 0; }
+.prose-skill blockquote { border-left: 2px solid var(--primary); padding-left: 12px; color: var(--muted-foreground); }
+.prose-skill table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.prose-skill th, .prose-skill td { border: 1px solid var(--border); padding: 6px 10px; text-align: left; }
+.prose-skill hr { border-color: var(--border); }
+
+/* React Flow theming */
+.react-flow {
+  --xy-background-color: var(--canvas);
+  --xy-node-border-radius: 10px;
+  --xy-minimap-background-color: var(--surface);
+  --xy-minimap-mask-background-color: color-mix(in oklch, var(--background) 70%, transparent);
+  --xy-controls-button-background-color: var(--surface);
+  --xy-controls-button-background-color-hover: var(--accent);
+  --xy-controls-button-color: var(--foreground);
+  --xy-controls-button-border-color: var(--border);
+  --xy-selection-background-color: color-mix(in oklch, var(--primary) 10%, transparent);
+  --xy-selection-border: 1px dashed var(--primary);
+  --xy-attribution-background-color: transparent;
+}
+.react-flow__handle {
+  width: 9px;
+  height: 9px;
+  border: 2px solid var(--surface);
+  background: var(--muted-foreground);
+  transition: transform 120ms ease, background 120ms ease;
+}
+.react-flow__handle:hover,
+.react-flow__handle.connectingto {
+  background: var(--primary);
+  transform: scale(1.35);
+}
+.react-flow__controls {
+  box-shadow: none;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+.react-flow__minimap {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+.react-flow__edge.selected .rel-path,
+.react-flow__edge:hover .rel-path {
+  stroke-width: 2.5;
+}
+.react-flow__connection-path {
+  stroke: var(--primary);
+  stroke-width: 2;
+  stroke-dasharray: 5 4;
+}
+@keyframes dash-flow {
+  to { stroke-dashoffset: -18; }
+}
+.rel-animated {
+  animation: dash-flow 900ms linear infinite;
+}
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.fade-up {
+  animation: fade-up 220ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
