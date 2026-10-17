@@ -66,9 +66,15 @@ export function useLandscape() {
   const stacks = useStacks();
   return useMemo(() => {
     if (!skills) return undefined;
-    const manualEdges = (stacks ?? []).flatMap((st) =>
-      st.edges.map((e) => ({ source: e.source, target: e.target, kind: e.kind, label: e.label })),
-    );
+    const manualEdges = (stacks ?? []).flatMap((st) => {
+      const nodeToSkill = new Map(st.nodes.map((n) => [n.id, n.skillId]));
+      return st.edges.map((e) => ({
+        source: nodeToSkill.get(e.source) ?? e.source,
+        target: nodeToSkill.get(e.target) ?? e.target,
+        kind: e.kind,
+        label: e.label,
+      }));
+    });
     return buildLandscape(skills, manualEdges);
   }, [skills, stacks]);
 }

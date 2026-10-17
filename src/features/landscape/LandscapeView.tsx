@@ -24,6 +24,7 @@ import { LandscapeEdge, type LandscapeFlowEdge } from './LandscapeEdge';
 import { AreaDetail } from './AreaDetail';
 import { RelationshipList } from './RelationshipList';
 import { GapList } from './GapList';
+import { SkillPanel } from './SkillPanel';
 
 const nodeTypes = { area: AreaNode, 'landscape-skill': LandscapeSkillNode };
 const edgeTypes = { 'landscape-rel': LandscapeEdge };
@@ -34,9 +35,10 @@ interface Props {
   skillId?: string;
 }
 
-export function LandscapeView({ tab, areaId }: Props) {
+export function LandscapeView({ tab, areaId, skillId }: Props) {
   const landscape = useLandscape();
   const skills = useSkills() ?? [];
+  const [panelSkillId, setPanelSkillId] = useState<string | null>(skillId ?? null);
 
   if (skills.length === 0) {
     return <EmptyLandscape />;
@@ -45,7 +47,7 @@ export function LandscapeView({ tab, areaId }: Props) {
 
   return (
     <ReactFlowProvider>
-      <LandscapeContent tab={tab} areaId={areaId} landscape={landscape} skills={skills} />
+      <LandscapeContent tab={tab} areaId={areaId} landscape={landscape} skills={skills} panelSkillId={panelSkillId} setPanelSkillId={setPanelSkillId} />
     </ReactFlowProvider>
   );
 }
@@ -67,12 +69,14 @@ function EmptyLandscape() {
   );
 }
 
-function LandscapeContent({ tab, areaId, landscape, skills }: { tab: LandscapeTab; areaId?: string; landscape: Landscape; skills: Skill[] }) {
+function LandscapeContent({ tab, areaId, landscape, skills, panelSkillId, setPanelSkillId }: { tab: LandscapeTab; areaId?: string; landscape: Landscape; skills: Skill[]; panelSkillId: string | null; setPanelSkillId: (id: string | null) => void }) {
   const navigate = useUI((s) => s.navigate);
   const go = (t: LandscapeTab) => navigate({ view: 'landscape', tab: t });
 
   const relCount = landscape.relationships.length;
   const gapCount = landscape.gaps.length;
+  const colors = useMemo(() => areaColors(landscape.areas), [landscape.areas]);
+  const panelSkill = panelSkillId ? skills.find((s) => s.id === panelSkillId) : undefined;
 
   return (
     <div className="flex h-full min-h-0 flex-col">
@@ -98,23 +102,27 @@ function LandscapeContent({ tab, areaId, landscape, skills }: { tab: LandscapeTa
         ]}
       />
 
-      <div className="min-h-0 flex-1">
-        {tab === 'map' && (
-          <ReactFlowProvider>
-            <LandscapeMap landscape={landscape} skills={skills} />
-          </ReactFlowProvider>
+      <div className="flex min-h-0 flex-1">
+        <div className="min-h-0 flex-1">
+          {tab === 'map' && (
+            <ReactFlowProvider>
+              <LandscapeMap landscape={landscape} skills={skills} onSkillClick={(id) => setPanelSkillId(id)} />
+            </ReactFlowProvider>
+          )}
+          {tab === 'areas' && <AreaDetail landscape={landscape} skills={skills} areaId={areaId} />}
+          {tab === 'relationships' && <RelationshipList landscape={landscape} skills={skills} />}
+          {tab === 'gaps' && <GapList landscape={landscape} skills={skills} />}
+        </div>
+        {panelSkill && (
+          <SkillPanel skill={panelSkill} landscape={landscape} areaColors={colors} skills={skills} onClose={() => setPanelSkillId(null)} />
         )}
-        {tab === 'areas' && <AreaDetail landscape={landscape} skills={skills} areaId={areaId} />}
-        {tab === 'relationships' && <RelationshipList landscape={landscape} skills={skills} />}
-        {tab === 'gaps' && <GapList landscape={landscape} skills={skills} />}
       </div>
     </div>
   );
 }
 
-function LandscapeMap({ landscape, skills }: { landscape: Landscape; skills: Skill[] }) {
+function LandscapeMap({ landscape, skills, onSkillClick }: { landscape: Landscape; skills: Skill[]; onSkillClick: (id: string) => void }) {
   const theme = useUI((s) => s.theme);
-  const navigate = useUI((s) => s.navigate);
   const rf = useReactFlow<LandscapeSkillFlowNode, LandscapeFlowEdge>();
   const [highlightSkill, setHighlightSkill] = useState<string | null>(null);
 
@@ -182,10 +190,10 @@ function LandscapeMap({ landscape, skills }: { landscape: Landscape; skills: Ski
   const onNodeClick = useCallback(
     (_: React.MouseEvent, node: LandscapeSkillFlowNode | AreaFlowNode) => {
       if (node.type === 'landscape-skill') {
-        navigate({ view: 'library', skillId: node.id, tab: 'edit' });
+        onSkillClick(node.id);
       }
     },
-    [navigate],
+    [onSkillClick],
   );
 
   const onNodeMouseEnter = useCallback((_: React.MouseEvent, node: LandscapeSkillFlowNode | AreaFlowNode) => {

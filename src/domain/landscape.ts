@@ -239,25 +239,22 @@ interface ManualEdge {
 /** Verified relationships: explicit markdown links or shared file references between skills. */
 function findVerifiedRelationships(skills: Skill[]): LandscapeRelationship[] {
   const rels: LandscapeRelationship[] = [];
-  const nameToId = new Map<string, string>();
-  skills.forEach((s) => nameToId.set(s.name, s.id));
-  nameToId.set(skills.map((s) => s.name).join('|'), ''); // noop guard
 
   for (const skill of skills) {
     const links = extractLinks(skill.content);
     for (const link of links) {
       const href = link.href.toLowerCase();
+      const linkText = link.text.toLowerCase();
       // Link to another skill by name or path
       for (const other of skills) {
         if (other.id === skill.id) continue;
         const otherName = other.name.toLowerCase();
         const otherSlug = otherName.replace(/[^a-z0-9]+/g, '-');
-        if (
-          href.includes(otherName) ||
-          href.includes(otherSlug) ||
-          href.includes(other.folder.toLowerCase()) ||
-          link.text.toLowerCase().includes(otherName)
-        ) {
+        const otherFolder = other.folder.toLowerCase();
+        const matchesName = otherName.length > 0 && (href.includes(otherName) || linkText.includes(otherName));
+        const matchesSlug = otherSlug.length > 1 && href.includes(otherSlug);
+        const matchesFolder = otherFolder.length > 1 && href.includes(otherFolder);
+        if (matchesName || matchesSlug || matchesFolder) {
           rels.push({
             id: `vrf-${skill.id}-${other.id}`,
             source: skill.id,
@@ -343,18 +340,18 @@ function findInferredRelationships(
         let reason = '';
 
         if (sim > 0.55 && sharedHeadings.length >= 2 && uniqueTermsA.length > 3 && uniqueTermsB.length > 3) {
-          // Very similar but with divergent vocabularies → potential conflict
+          // Very similar but with divergent vocabularies → suggested conflict
           kind = 'conflict';
-          reason = `High content similarity (${Math.round(sim * 100)}%) with shared structure but divergent terminology. These skills may give contradictory guidance.`;
+          reason = `Suggested conflict: high content similarity (${Math.round(sim * 100)}%) with shared structure but divergent terminology. These skills may give contradictory guidance — review to confirm.`;
         } else if (sim > 0.4 && sharedHeadings.length >= 2) {
           kind = 'overlap';
-          reason = `Significant content overlap (${Math.round(sim * 100)}%). Both skills cover similar ground${sharedHeadings.length ? ` in sections like "${sharedHeadings.slice(0, 2).join('", "')}"` : ''}.`;
+          reason = `Suggested overlap: significant content similarity (${Math.round(sim * 100)}%). Both skills appear to cover similar ground${sharedHeadings.length ? ` in sections like "${sharedHeadings.slice(0, 2).join('", "')}"` : ''} — review whether this is redundant or complementary.`;
         } else if (sharedTags.length > 0 && sim < 0.3) {
           kind = 'complement';
-          reason = `Shares tag(s): ${sharedTags.join(', ')}. Different focus but related domain.`;
+          reason = `Suggested complement: shares tag(s) ${sharedTags.join(', ')}. Different focus but possibly related domain.`;
         } else {
           kind = 'complement';
-          reason = `Related content (${Math.round(sim * 100)}% similarity). These skills likely work together in adjacent responsibilities.`;
+          reason = `Suggested complement: related content (${Math.round(sim * 100)}% similarity). These skills may work together in adjacent responsibilities.`;
         }
 
         const confidence = Math.min(1, Math.max(sim, sharedTags.length * 0.15));
@@ -377,7 +374,7 @@ function findInferredRelationships(
           target: b.id,
           kind: 'handoff',
           trust: 'inferred',
-          reason: `Addresses similar sections ("${sharedHeadings[0]}") with different vocabulary. One may feed into the other.`,
+          reason: `Suggested handoff: addresses similar sections ("${sharedHeadings[0]}") with different vocabulary. One may feed into the other — review to confirm.`,
           confidence: 0.4,
         });
       }
@@ -537,7 +534,7 @@ export const LANDSCAPE_KIND_META: Record<LandscapeKind, { label: string; verb: s
 
 export const TRUST_META: Record<TrustLevel, { label: string; description: string; cls: string }> = {
   verified: { label: 'Verified', description: 'Found an explicit reference in the skill content.', cls: 'text-ok border-ok/30 bg-ok/10' },
-  inferred: { label: 'Inferred', description: 'Detected from content similarity, tags, and structure. Not confirmed.', cls: 'text-warn border-warn/30 bg-warn/10 border-dashed' },
+  inferred: { label: 'Inferred', description: 'Suggested from content similarity, tags, and structure. Not confirmed — review before relying on it.', cls: 'text-warn border-warn/30 bg-warn/10 border-dashed' },
   manual: { label: 'Manual', description: 'Defined by a user in a stack.', cls: 'text-info border-info/30 bg-info/10' },
 };
 
